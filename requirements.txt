@@ -1,0 +1,13 @@
+tensorflow<=2.10.0
+hypernets>=0.3.0
+prophet>=1.0.1
+statsmodels>=0.12.1
+numpy<2.0.0
+pandas<2.0
+scikit-learn==1.0.2
+scipy
+numba
+hyperts
+matplotlib
+mcp
+fastapi
