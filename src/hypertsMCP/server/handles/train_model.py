@@ -12,7 +12,7 @@ from ..storage_manager import ModelStore
 
 from hyperts import make_experiment
 from hyperts.toolbox import from_3d_array_to_nested_df
-from utils import json_to_df, is_nested
+from ..utils import json_to_df, is_nested
 
 
 TaskType = Literal[
@@ -23,7 +23,7 @@ TaskType = Literal[
 ]
 
 class TrainModelArgs(BaseModel):
-    train_data: str = Field(..., alias="jsonData")
+    train_data: str
     task: TaskType
 
     eval_data: Optional[str] = None
@@ -142,18 +142,7 @@ class RunTrainModel(BaseHandler):
         print("here4\n")
         return {"model_id": unique_id}
 
-    async def run_tool(self, arguments: Dict[str, Any], isMCP: bool) -> Sequence[TextContent]:
+    async def run_tool(self, arguments: Dict[str, Any]) -> dict:
         args = TrainModelArgs(**arguments)
         result = await self.handle_train_model(args)
-        if isMCP:
-            return result
-        else:
-            return result
-        # try:
-        #     print("Input arguments:", arguments)  # 调试日志
-        #     args = TrainModelArgs(**arguments)
-        #     result = await self.handle_train_model(args)
-        #     return [TextContent(text=str(result))] if isMCP else result.dict()
-        # except Exception as e:
-        #     print(f"Validation failed: {e}")  # 捕获具体错误
-        #     raise  # 重新抛出或返回错误信息
+        return result

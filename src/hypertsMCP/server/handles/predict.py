@@ -8,10 +8,10 @@ from mcp.types import TextContent
 from .base import BaseHandler
 from ..storage_manager import ModelStore
 
-from utils import json_to_df
+from ..utils import json_to_df
 
 class PredictArgs(BaseModel):
-    test_data: str = Field(..., alias="jsonData")
+    test_data: str
     model_id: str  # ID of the model to use for prediction
     proba: bool = False  # Whether to return probability estimates
 
@@ -40,7 +40,7 @@ class RunPredict(BaseHandler):
             
         return {'prediction': prediction.tolist()}
 
-    async def run_tool(self, arguments: Dict[str, Any]) -> Sequence[TextContent]:
+    async def run_tool(self, arguments: Dict[str, Any]) -> dict:
         input = PredictArgs(**arguments)
         print(type(input))
         result = await self.handle_predict(input)

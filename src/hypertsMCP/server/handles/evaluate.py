@@ -5,14 +5,14 @@ from mcp import Tool
 from mcp.types import TextContent
 
 from .base import BaseHandler
-from ..storage_manager import storage, ModelStore
+from ..storage_manager import ModelStore
 
 import pandas as pd
-from utils import json_to_df, df_to_json
+from ..utils import json_to_df, df_to_json
 import json
 import numpy as np
 class EvaluateArgs(BaseModel):
-    test_data: constr(strict=True)
+    test_data: str
     y_pred: List
     model_id: str  # ID of the model used for evaluation
     y_proba: Optional[dict] = None  # Optional predicted probabilities
@@ -45,11 +45,8 @@ class RunEvaluate(BaseHandler):
 
         return {'scores': scores_json}
 
-    async def run_tool(self, arguments: Dict[str, Any], isMCP: bool) -> Sequence[TextContent]:
+    async def run_tool(self, arguments: Dict[str, Any]) -> dict:
         input = EvaluateArgs(**arguments)
         print(type(input))
         result = await self.handle_evaluate(input)
-        if isMCP:
-            return result
-        else:
-            return result
+        return result

@@ -1,7 +1,7 @@
 import asyncio
 import contextlib
 import os
-
+import starlette
 from starlette.responses import Response
 
 import uvicorn
@@ -17,12 +17,12 @@ from fastapi import FastAPI
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 
-from handles.base import ToolRegistry
+from .handles.base import ToolRegistry
 
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from storage_manager import storage
+# from .storage_manager import storage
 
 # initialize mcp lowlevel server, sse transport, and fastapi
 mcp_app = Server("operateMysql")
@@ -39,7 +39,7 @@ async def list_tools() -> list[Tool]:
 @mcp_app.call_tool()
 async def call_tool(name: str, args: Dict[str, Any]) -> Sequence[TextContent]:
     tool = ToolRegistry.get_tool(name)
-    return await tool.run_tool(args, 1)
+    return await tool.run_tool(args)
 
 #HTTP routes
 
@@ -54,7 +54,7 @@ def register_fastapi_tool_route(app: FastAPI, tool_name: str):
 
     @app.post(f"/{tool_name}")
     async def tool_route(args: Dict[str, Any]):
-        return await tool.run_tool(args, 0)
+        return await tool.run_tool(args)
 
 # register tools for HTTP calls
 register_fastapi_tool_route(fastapi_app, "train_test_split")
