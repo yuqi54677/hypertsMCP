@@ -15,7 +15,7 @@ A Model Context Protocol (MCP) server that provides time series machine learning
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/yuqi54677/hypertsMCP.git
 cd hypertsMCP
 ```
 
