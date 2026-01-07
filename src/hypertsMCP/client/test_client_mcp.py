@@ -1,11 +1,11 @@
+"""Example MCP client demonstrating the full ML pipeline."""
 import asyncio
 import json
-import pandas as pd
 from typing import Optional
 from mcp import ClientSession
 from mcp.client.sse import sse_client
 from hyperts.datasets import load_basic_motions
-from utils import df_to_json, json_to_df
+from hypertsMCP.utils import df_to_json, json_to_df
 
 class MCPChainClient:
     def __init__(self):
@@ -43,17 +43,10 @@ class MCPChainClient:
             name="train_test_split",
             arguments={"data": df_json, "test_size": 0.3}
         )
-        # extract df from response
-        # print(res)
-        # print(type(res))
         result = res.content[0].text
-        #print(result)
-        result_dict = json.loads(s=result)
-        # print(type(result_dict['train_set']))
-        # print(type(result_dict['test_set']))
+        result_dict = json.loads(result)
         self.train_df = json_to_df(result_dict['train_set'])
         self.test_df = json_to_df(result_dict['test_set'])
-        # print(type(train_df['Var_1'][0]))
         self.train_df.to_csv('./temp_files/mcp_train_set.csv', encoding='UTF-8')
         self.test_df.to_csv('./temp_files/mcp_test_set.csv', encoding='UTF-8')
         print("data sets saved")
@@ -86,8 +79,7 @@ class MCPChainClient:
             }
         )
         result = res.content[0].text
-        # print(result)
-        result_dict = json.loads(s=result)
+        result_dict = json.loads(result)
         self.y_pred = result_dict['prediction']
         print(self.y_pred)
 
@@ -104,7 +96,7 @@ class MCPChainClient:
             }
         )
         result = res.content[0].text
-        result_dict = json.loads(s=result)
+        result_dict = json.loads(result)
         eval = json_to_df(result_dict['scores'])
         print("\nEvaluation result:")
         print(eval)

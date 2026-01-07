@@ -1,62 +1,60 @@
-import asyncio
-import contextlib
-import os
+"""Main server with MCP and HTTP endpoints."""
+import json
 import starlette
 from starlette.responses import Response
-
 import uvicorn
 
 from typing import Sequence, Dict, Any
 from mcp.server.sse import SseServerTransport
-
 from mcp.server.lowlevel import Server
-from mcp.types import Tool, TextContent, Prompt, GetPromptResult
+from mcp.types import Tool, TextContent
 
 from fastapi import FastAPI
-
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 
 from .handles.base import ToolRegistry
 
-from starlette.requests import Request
-from starlette.responses import JSONResponse
-
-# from .storage_manager import storage
-
-# initialize mcp lowlevel server, sse transport, and fastapi
+# Initialize MCP server, SSE transport, and FastAPI
 mcp_app = Server("operateMysql")
 fastapi_app = FastAPI()
 sse = SseServerTransport("/messages/")
 
 # MCP server handlers
-
-#list available tools in mcp format
 @mcp_app.list_tools()
 async def list_tools() -> list[Tool]:
+    """List all available tools in MCP format."""
     return ToolRegistry.get_all_tools()
+
 
 @mcp_app.call_tool()
 async def call_tool(name: str, args: Dict[str, Any]) -> Sequence[TextContent]:
+    """Call a tool by name with arguments."""
     tool = ToolRegistry.get_tool(name)
-    return await tool.run_tool(args)
+    result = await tool.run_tool(args)
+    # Convert dict result to TextContent for MCP protocol
+    if isinstance(result, dict):
+        return [TextContent(type="text", text=json.dumps(result))]
+    return result
 
-#HTTP routes
 
-# if no specific endpoint provided, list available tools
+# HTTP routes
 @fastapi_app.post("/")
 async def root():
+    """List available HTTP endpoints."""
     return {"available http endpoints": ["train_test_split", "train_model", "predict", "evaluate"]}
 
-# a method that auto register tools as fastapi routes, using tool name as endpoint
+
 def register_fastapi_tool_route(app: FastAPI, tool_name: str):
+    """Register a tool as a FastAPI route using the tool name as endpoint."""
     tool = ToolRegistry.get_tool(tool_name)
 
     @app.post(f"/{tool_name}")
     async def tool_route(args: Dict[str, Any]):
         return await tool.run_tool(args)
 
-# register tools for HTTP calls
+
+# Register tools for HTTP calls
 register_fastapi_tool_route(fastapi_app, "train_test_split")
 register_fastapi_tool_route(fastapi_app, "train_model")
 register_fastapi_tool_route(fastapi_app, "predict")

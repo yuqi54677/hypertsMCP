@@ -1,6 +1,6 @@
-from typing import Dict, Any, Sequence, Type, ClassVar
-
-from mcp.types import TextContent, Tool
+"""Base handler and tool registry for MCP tools."""
+from typing import Dict, Any, Type, ClassVar
+from mcp.types import Tool
 
 
 class ToolRegistry:
@@ -35,6 +35,7 @@ class BaseHandler:
     def get_tool_description(self) -> Tool:
         raise NotImplementedError
 
-    async def run_tool(self, arguments: Dict[str, Any]) -> Sequence[TextContent]:
+    async def run_tool(self, arguments: Dict[str, Any]):
+        """Run the tool with given arguments. Returns dict for HTTP, or Sequence[TextContent] for MCP."""
         raise NotImplementedError
 

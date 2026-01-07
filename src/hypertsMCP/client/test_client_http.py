@@ -1,9 +1,8 @@
+"""Example HTTP client demonstrating the full ML pipeline."""
 import asyncio
-import json
 import httpx
-import pandas as pd
 from hyperts.datasets import load_basic_motions
-from utils import df_to_json, json_to_df
+from hypertsMCP.utils import df_to_json, json_to_df
 
 class HTTPChainClient:
     def __init__(self):

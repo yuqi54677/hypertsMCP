@@ -1,15 +1,11 @@
-from typing import Optional, Dict, Any, Sequence, List
-from pydantic import BaseModel, constr
-
+"""Handler for model evaluation functionality."""
+from typing import Optional, Dict, Any, List
+from pydantic import BaseModel
 from mcp import Tool
-from mcp.types import TextContent
-
 from .base import BaseHandler
 from ..storage_manager import ModelStore
-
 import pandas as pd
 from ..utils import json_to_df, df_to_json
-import json
 import numpy as np
 class EvaluateArgs(BaseModel):
     test_data: str
@@ -29,16 +25,12 @@ class RunEvaluate(BaseHandler):
         )
     
     async def handle_evaluate(self, args: EvaluateArgs) -> dict:
-        print("running handle_evaluate\n")
-        # reconstruct df/np.array
+        """Evaluate model performance against test data."""
         test_df = json_to_df(args.test_data)
         y_pred = np.array(args.y_pred)
         y_proba_df = json_to_df(args.y_proba) if args.y_proba else None
         
-        # load mode
         model = ModelStore.load(args.model_id)
-
-        # evaluation
         _, y_test = model.split_X_y(test_df.copy())
         scores = model.evaluate(y_test, y_pred, y_proba_df)
         scores_json = df_to_json(scores)
@@ -46,7 +38,7 @@ class RunEvaluate(BaseHandler):
         return {'scores': scores_json}
 
     async def run_tool(self, arguments: Dict[str, Any]) -> dict:
-        input = EvaluateArgs(**arguments)
-        print(type(input))
-        result = await self.handle_evaluate(input)
+        """Run the evaluate tool."""
+        input_args = EvaluateArgs(**arguments)
+        result = await self.handle_evaluate(input_args)
         return result

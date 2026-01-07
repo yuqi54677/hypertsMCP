@@ -1,13 +1,9 @@
-import pandas as pd
-from typing import Optional, Any, Dict, Sequence
-from pydantic import BaseModel, Field
-
+"""Handler for model prediction functionality."""
+from typing import Optional, Any, Dict
+from pydantic import BaseModel
 from mcp import Tool
-from mcp.types import TextContent
-
 from .base import BaseHandler
 from ..storage_manager import ModelStore
-
 from ..utils import json_to_df
 
 class PredictArgs(BaseModel):
@@ -28,20 +24,15 @@ class RunPredict(BaseHandler):
         )
     
     async def handle_predict(self, args: PredictArgs) -> dict:
-        print("running handle_predict\n")
+        """Make predictions using a trained model."""
         test_df = json_to_df(args.test_data)
         model = ModelStore.load(args.model_id)
         X_test, y_test = model.split_X_y(test_df.copy())
-        # print(args.model_id)
-        # print(type(model))
-        # print(type(X_test))
         prediction = model.predict(X_test)
-        
-            
         return {'prediction': prediction.tolist()}
 
     async def run_tool(self, arguments: Dict[str, Any]) -> dict:
-        input = PredictArgs(**arguments)
-        print(type(input))
-        result = await self.handle_predict(input)
+        """Run the predict tool."""
+        input_args = PredictArgs(**arguments)
+        result = await self.handle_predict(input_args)
         return result

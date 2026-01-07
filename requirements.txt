@@ -11,3 +11,6 @@ hyperts
 matplotlib
 mcp
 fastapi
+pytest
+pytest-asyncio
+httpx

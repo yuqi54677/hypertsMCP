@@ -1,17 +1,10 @@
-import hashlib
-import time
-import pandas as pd
-from typing import Optional, Any, Dict, Sequence, List, Literal
+"""Handler for model training functionality."""
+from typing import Optional, Any, Dict, List, Literal
 from pydantic import BaseModel, Field
-
 from mcp import Tool
-from mcp.types import TextContent
-
 from .base import BaseHandler
 from ..storage_manager import ModelStore
-
 from hyperts import make_experiment
-from hyperts.toolbox import from_3d_array_to_nested_df
 from ..utils import json_to_df, is_nested
 
 
@@ -84,15 +77,12 @@ class RunTrainModel(BaseHandler):
         )
     
     async def handle_train_model(self, args: TrainModelArgs) -> dict:
-        print("running handle train models\n")
+        """Train a machine learning model using HyperTS."""
         train_df = json_to_df(args.train_data)
         if args.task in ("classification", "regression") and not is_nested(train_df):
-            print("need nested")
-        # print("transformed to ")
-        # if args.task in ("classification", "regression"):
-        #     train_df = from_3d_array_to_nested_df(train_df, args.columns, args.cells_as_array)
-        #     print('transformed nested df\n')
-        print(train_df.columns)
+            # Note: Non-nested data may need transformation for classification/regression tasks
+            pass
+        
         experiment = make_experiment(
             train_data=train_df.copy(),
             task=args.task,
@@ -135,11 +125,8 @@ class RunTrainModel(BaseHandler):
             random_state=args.random_state,
             clear_cache=args.clear_cache
         )
-        print("experiment ready\n")
         model = experiment.run()
-        print("model ready\n")
         unique_id = ModelStore.save(model)
-        print("here4\n")
         return {"model_id": unique_id}
 
     async def run_tool(self, arguments: Dict[str, Any]) -> dict:
